@@ -40,6 +40,14 @@ runs `./install.sh`, and covers Windows). Two additions:
    "Input Monitoring", Return; then VO+Right Arrow to the list, find their
    terminal app, and VO+Space to turn it on. Offer to open the pane for
    them with `open "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"`.
+3. Camera: run `uv run python -m backtalk.camera` once yourself. On a Mac
+   this makes macOS ask for camera permission for their terminal app: tell
+   them the alert is on screen, VoiceOver should land on it, and to move to
+   "Allow" and press VO+Space; then run it again. On Windows, if it fails,
+   have them open Settings (Windows+I), search "camera privacy", and turn
+   on camera access and "Let desktop apps access your camera". A JSON line
+   with "ok": true means it works. If they have no camera, say the camera
+   features won't work and move on.
 
 ## Phase 2: About them
 

@@ -1,0 +1,59 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install the light dependencies
+        run: python -m pip install --quiet numpy sounddevice httpx pynput opencv-python-headless
+
+      - name: Code compiles on Windows
+        run: python -m compileall -q backtalk tests
+
+      - name: Safety rules
+        run: python tests/test_safety.py
+
+      - name: Characters and settings
+        run: python tests/test_personas.py
+
+      - name: Camera (no camera on the runner, so this also proves the no-camera message)
+        run: python tests/test_camera.py
+
+      - name: ElevenLabs key is read from Credential Manager
+        shell: pwsh
+        run: |
+          cmdkey /generic:backtalk-ci-test /user:ci /pass:ci-secret-value | Out-Null
+          python -c "from backtalk.mouth import _read_windows_credential as r; v = r('backtalk-ci-test'); assert v == 'ci-secret-value', repr(v); assert r('backtalk-ci-missing') == ''; print('Credential Manager round trip OK')"
+          cmdkey /delete:backtalk-ci-test | Out-Null
+
+      - name: Push-to-talk key resolves
+        run: python -c "from backtalk.ptt import resolve_key_name as r; k, ok = r('right_ctrl'); assert ok and k == 'ctrl_r', (k, ok); print('right_ctrl ->', k)"
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install the light dependencies
+        run: python -m pip install --quiet numpy sounddevice httpx pynput opencv-python-headless
+      - name: Code compiles on macOS
+        run: python -m compileall -q backtalk tests
+      - name: Safety rules
+        run: python tests/test_safety.py
+      - name: Characters and settings
+        run: python tests/test_personas.py
+      - name: Camera
+        run: python tests/test_camera.py

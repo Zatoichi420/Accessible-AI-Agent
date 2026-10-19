@@ -40,7 +40,7 @@ try:
 except ImportError:                       # older SDKs: nothing to silence
     CanUseToolShadowedWarning = None
 
-from backtalk import personas, safety
+from backtalk import camera, personas, safety
 from backtalk.config import CFG, DISCIPLINE
 from backtalk.vlog import LOG_PATH, log
 
@@ -154,7 +154,8 @@ class WarmBrain:
                 mcp_servers=CFG.get("mcp_servers") or {},
                 allowed_tools=list(CFG.get("allowed_tools") or []),
                 hooks={"PreToolUse": [HookMatcher(hooks=[_audit_hook])]},
-                add_dirs=CFG["extra_dirs"],
+                # the camera's photo folder, so the agent can open photos
+                add_dirs=CFG["extra_dirs"] + [str(camera.PHOTO_DIR)],
                 skills=CFG["visible_skills"],
                 resume=rid,
             )

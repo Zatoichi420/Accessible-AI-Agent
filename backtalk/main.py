@@ -60,7 +60,7 @@ import sys
 import threading
 import time
 
-from backtalk import personas, safety, signals
+from backtalk import camera, personas, safety, signals
 from backtalk.brain import WarmBrain
 from backtalk.config import CFG
 from backtalk.ears import Ears, record_held, reset_audio, warm as warm_ears
@@ -970,6 +970,26 @@ async def amain():
             signals.static_stop()
         personas.write_active_file()
 
+    async def _camera_turn(task):
+        """Show and Tell: cue the user, take the photo, and return the
+        prompt for the brain, or None after saying what went wrong."""
+        loop = asyncio.get_event_loop()
+        mouth.say({"identify": "Hold it up, about a foot from the camera.",
+                   "read": "Hold it up to the camera, text facing it.",
+                   "scene": "Looking.",
+                   "color": "Hold it up to the camera."}[task])
+        await loop.run_in_executor(None, mouth.wait_done, 10)
+        signals.cue_listening()   # the shutter moment
+        shot = await loop.run_in_executor(None, camera.capture)
+        if not shot["ok"]:
+            log(f"[camera] failed: {shot['error'][:120]}")
+            mouth.say(shot["error"])
+            signals.set_state("idle")
+            return None
+        log(f"[camera] {task}: {shot['path']} issues={shot['issues']}")
+        mouth.say("Got it. One moment.")
+        return camera.prompt_for(task, shot)
+
     async def handle(text: str, spoke_from: float | None = None) -> bool:
         """Process one utterance; returns False on quit. spoke_from is
         when the utterance STARTED (the PTT press), so an answer can be
@@ -1049,6 +1069,13 @@ async def amain():
         if verb:
             await run_console(verb)
             return True
+        task = camera.match(text) if CFG.get("camera", True) else None
+        if task:
+            _deny_pending()
+            await brain.reset_turn()
+            text = await _camera_turn(task)
+            if text is None:
+                return True
         signals.set_state("thinking")
         signals.static_start()
         # Clean the pipe: drain the interrupted turn's leftovers so the

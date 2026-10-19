@@ -1,1 +1,6 @@
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+*.sh text eol=lf
+# upstream: keep update.bat byte-for-byte (listed last so it wins)
 update.bat -text

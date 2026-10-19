@@ -175,6 +175,11 @@ DEFAULTS = {
     # mcpServers), e.g. a reverse-engineering server that other Claude
     # sessions should not load.
     "mcp_servers": {},
+    # The camera ("what am I holding?", "read this", "describe what you
+    # see", "what color is this"). camera_index picks the camera when the
+    # computer has more than one (0 = the built-in or first one).
+    "camera": True,
+    "camera_index": 0,
     # Tools and MCP servers the agent may NEVER use, in any permission
     # mode, e.g. a brokerage or a write-anything automation bridge. A
     # server prefix ("mcp__some_server") blocks all of its tools.
@@ -254,7 +259,11 @@ DISCIPLINE = (
     "to', 'be more descriptive', 'be brief', 'normal detail', 'stop "
     "swearing', 'no jokes', 'no more sounds', 'turn on the sounds', "
     "'I'm using NVDA' (or VoiceOver, JAWS, TalkBack), and 'what are "
-    "my settings'. High-risk actions "
+    "my settings'. Camera: 'what am I holding', 'read this', "
+    "'describe what you see', 'what color is this' take a photo and "
+    "hand it to you; in a typed session you can take one yourself by "
+    "running python -m backtalk.camera in the voice app's folder. "
+    "High-risk actions "
     "(sending email, deleting, sharing, calendar changes, pushing code, "
     "risky shell commands) need an exact phrase such as 'confirm send', "
     "which the permission check names out loud. You cannot flip "

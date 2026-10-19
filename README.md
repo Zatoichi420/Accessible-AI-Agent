@@ -2,8 +2,9 @@
 
 A talking AI assistant built for blind and low-vision computer users. You
 hold a key, talk, and it answers out loud. It can describe your screen, web
-pages and images in as much detail as you want, work with files and apps,
-and remember things. It is designed to be encouraging and never
+pages and images in as much detail as you want, identify things you hold
+up to your computer's camera, work with files and apps, and remember
+things. It is designed to be encouraging and never
 condescending.
 
 It comes with six characters you can switch between by voice:
@@ -25,26 +26,39 @@ knew a second earlier.
 
 ## What you need
 
-- A Mac with macOS 14 or newer. Apple Silicon (M1 or newer) is fastest.
-  Windows support is coming.
+- A Mac with macOS 14 or newer (Apple Silicon is fastest), or a Windows
+  10 or 11 PC. The Windows version is less tested so far.
 - A paid Claude subscription (Pro is enough). The assistant runs on Claude
   Code, which uses your subscription. There is nothing else to pay for.
 - About 2 GB of free disk space for the speech models.
 - A microphone (the built-in one works) and speakers or headphones.
+- For the camera features, a webcam (the built-in one works).
 - Optional: an ElevenLabs account for more natural voices. Without it, the
   free built-in voices are used.
 
 ## Install
 
-Everything below is done in Terminal by keyboard. To open Terminal with
-VoiceOver: press Command+Space, type Terminal, press Return.
+Everything below is done by keyboard. On a Mac, use Terminal: press
+Command+Space, type Terminal, press Return. On Windows, use PowerShell:
+press the Windows key, type PowerShell, press Return.
 
 1. Install Claude Code, if you don't have it. Paste this line into Terminal
    and press Return:
 
+   On a Mac:
+
    ```
    curl -fsSL https://claude.ai/install.sh | bash
    ```
+
+   On Windows (PowerShell):
+
+   ```
+   irm https://claude.ai/install.ps1 | iex
+   ```
+
+   Windows also needs Git: `winget install --id Git.Git -e`, then close
+   and reopen PowerShell.
 
    Then type `claude` and press Return, and follow the sign-in steps. When
    you are signed in, type `/exit` and press Return.
@@ -57,8 +71,9 @@ VoiceOver: press Command+Space, type Terminal, press Return.
    cd ~/accessible-agent
    ```
 
-   If macOS asks to install the command line developer tools, press Return
-   to accept, wait for it to finish, then run the two lines again.
+   On Windows, the same two lines work in PowerShell. If macOS asks to
+   install the command line developer tools, press Return to accept, wait
+   for it to finish, then run the two lines again.
 
 3. Start the setup assistant. Type `claude` and press Return, then type:
 
@@ -94,6 +109,27 @@ VoiceOver: press Command+Space, type Terminal, press Return.
 | "repeat that" / "talk slower" / "talk faster" | Replay or change pace |
 
 All settings are saved, so they stick after a restart.
+
+### The camera ("what am I holding?")
+
+Like Alexa's Show and Tell on the Echo Show: hold an item about a foot
+from your computer's camera and ask. It tells you what it is (brand,
+product, size, best-by date if it can read it). If it can't see well, it
+tells you how to move the item, for example "turn it around to show the
+label", and you ask again.
+
+| Say | What it does |
+|---|---|
+| "what am I holding" / "what's in my hand" / "what is this" | Identifies the item |
+| "read this" / "read the label" / "what does this say" | Reads the text |
+| "what color is this" | Names the colors |
+| "describe what you see" / "what's in front of me" | Describes the scene |
+
+The first time, your computer asks for camera permission. On a Mac,
+allow Terminal (System Settings, Privacy and Security, Camera). On Windows,
+turn on "Let desktop apps access your camera" (Settings, Privacy and
+security, Camera). Photos are kept on your computer only, last 20 photos,
+in the `state/camera` folder; each one is sent to Claude to be described.
 
 ## Safety
 
