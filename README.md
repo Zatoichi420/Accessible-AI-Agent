@@ -112,24 +112,44 @@ All settings are saved, so they stick after a restart.
 
 ### The camera ("what am I holding?")
 
-Like Alexa's Show and Tell on the Echo Show: hold an item about a foot
-from your computer's camera and ask. It tells you what it is (brand,
-product, size, best-by date if it can read it). If it can't see well, it
-tells you how to move the item, for example "turn it around to show the
-label", and you ask again.
+**The camera is off unless you choose to turn it on.** Camera use is
+voluntary. Say "turn on the camera": the assistant explains what it does,
+then waits for you to say "confirm". Say "turn off the camera" any time.
+The person who made this assistant has no access to your camera, photos
+or recordings; see `PRIVACY.md`.
+
+Once you turn it on, it works like Alexa's Show and Tell on the Echo Show:
+hold an item about a foot from your computer's camera and ask. It tells you
+what it is (brand, product, size, best-by date if it can read it). If it
+can't see well, it tells you how to move the item, for example "turn it
+around to show the label", and you ask again.
 
 | Say | What it does |
 |---|---|
+| "turn on the camera" / "turn off the camera" | Your choice, any time |
 | "what am I holding" / "what's in my hand" / "what is this" | Identifies the item |
 | "read this" / "read the label" / "what does this say" | Reads the text |
 | "what color is this" | Names the colors |
 | "describe what you see" / "what's in front of me" | Describes the scene |
+| "delete my photos" | Deletes the saved photo |
 
-The first time, your computer asks for camera permission. On a Mac,
-allow Terminal (System Settings, Privacy and Security, Camera). On Windows,
-turn on "Let desktop apps access your camera" (Settings, Privacy and
-security, Camera). Photos are kept on your computer only, last 20 photos,
-in the `state/camera` folder; each one is sent to Claude to be described.
+A photo is taken only when you ask, and only the most recent one is kept
+on your computer. Each photo you ask about is sent to Claude, under your
+own Claude account, to be described.
+
+The first time you use it, your computer asks for camera permission. On a
+Mac, allow Terminal (System Settings, Privacy and Security, Camera). On
+Windows, turn on "Let desktop apps access your camera" (Settings, Privacy
+and security, Camera).
+
+## Your privacy
+
+Everything runs on your computer, under your own accounts. The person who
+made this assistant runs no server, collects nothing, and has no access to
+your camera, microphone, photos, recordings, transcripts or files. Your
+voice is turned into text on your computer. What you say, as text, goes to
+Claude under your own account so it can answer. Full details, including
+what is saved and how to delete it: `PRIVACY.md`.
 
 ## Safety
 

@@ -7,6 +7,35 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import numpy as np  # noqa: E402
 
 from backtalk import camera as c  # noqa: E402
+from backtalk import safety  # noqa: E402
+from backtalk.config import CFG, DEFAULTS  # noqa: E402
+
+# Off by default: no photo, the standalone command refuses, and only the
+# user's spoken opt-in can turn it on.
+CFG["camera"] = DEFAULTS["camera"]
+off_shot = c.capture(index=0, settle=0.1)
+OFF_CASES = [
+    (DEFAULTS["camera"], False),
+    (c.enabled(), False),
+    (off_shot["ok"], False),
+    (off_shot["error"], c.OFF_MESSAGE),
+    ("no access to your camera" in c.DISCLAIMER, True),
+    (c.match_control("Turn on the camera."), "camera_on"),
+    (c.match_control("turn off the camera"), "camera_off"),
+    (c.match_control("delete my photos"), "camera_delete"),
+    (c.match_control("turn on the lights"), None),
+    # the agent can't switch it on by editing the config
+    (bool(safety.hard_deny("Edit", {"file_path": "backtalk.json",
+                                    "old_string": '"camera": false',
+                                    "new_string": '"camera": true'})), True),
+    (bool(safety.hard_deny("Bash", {"command":
+        "python3 -c \"d['camera']=True\""})), True),
+    (bool(safety.hard_deny("Bash", {"command":
+        "jq '.camera = true' backtalk.json"})), True),
+    (bool(safety.hard_deny("Edit", {"file_path": "backtalk.json",
+                                    "new_string": '"camera": false'})), False),
+]
+CFG["camera"] = True       # the rest checks behavior once the user opted in
 
 rng = np.random.default_rng(0)
 sharp = rng.integers(0, 256, (480, 640, 3), dtype=np.uint8)   # busy detail
@@ -17,7 +46,7 @@ blurry = np.full((480, 640, 3), 128, dtype=np.uint8)           # no edges
 shot = {"ok": True, "path": "/tmp/photo.jpg", "issues": ["it is dark"]}
 missing = c.capture(index=97, settle=0.2)
 
-CASES = [
+CASES = OFF_CASES + [
     (c.match("What am I holding?"), "identify"),
     (c.match("what's in my hand"), "identify"),
     (c.match("Read the label."), "read"),

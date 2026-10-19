@@ -115,9 +115,18 @@ def _field_description(tool_input) -> str:
     return str(strip(tool_input or {}))
 
 
+# Camera use is the user's choice alone: the agent may not switch it on by
+# editing the config, by any tool.
+_CAMERA_ON = re.compile(
+    r"""(?:["']camera["']\]?|\.camera)\s*[:=]\s*(?:true|True|1)\b""")
+
+
 def hard_deny(tool: str, tool_input) -> str | None:
     """A reason string when this call must never run, else None."""
     flat = str(tool_input or "")
+    if _CAMERA_ON.search(flat.replace('\\"', '"').replace("\\'", "'")):
+        return ("Blocked by a hard safety rule: only the user can turn on "
+                "the camera, by saying 'turn on the camera'.")
     if _BROWSER_FILL.search(tool) and _SECRET_FIELD.search(
             _field_description(tool_input)):
         return ("Blocked by a hard safety rule: I never type into password, "

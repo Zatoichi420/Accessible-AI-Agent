@@ -7,6 +7,13 @@ foot from the camera, ask "what am I holding?", get a short answer, and if
 the view isn't good enough, get told how to move the item (closer, turn it
 to the label, more light) and ask again.
 
+OFF BY DEFAULT. Camera use is voluntary: only the user can turn it on, by
+saying "turn on the camera" and then "confirm" after hearing what it does.
+The agent can't turn it on (safety.py blocks config edits that would), and
+the standalone command refuses while it is off. A photo is taken only when
+the user asks; only the most recent one is kept on disk; "delete my
+photos" or turning the camera off removes them.
+
 Works on macOS (AVFoundation) and Windows (DirectShow) through OpenCV.
 Also runnable on its own, so typed and phone sessions can take a photo:
 
@@ -20,7 +27,54 @@ from pathlib import Path
 from backtalk.config import CFG, REPO
 
 PHOTO_DIR = REPO / "state" / "camera"
-KEEP_PHOTOS = 20
+
+# Spoken when the user asks to turn the camera on, before they confirm.
+DISCLAIMER = (
+    "Before you decide: using the camera is completely your choice. When "
+    "it's on, I take a photo only when you ask, like what am I holding. "
+    "The photo stays on this computer, and it is sent to Claude, under "
+    "your own Claude account, to be described. The person who made this "
+    "assistant has no access to your camera, your photos or your "
+    "recordings. I keep only the latest photo, and you can say delete my "
+    "photos or turn off the camera any time. Say confirm to turn the "
+    "camera on.")
+OFF_MESSAGE = ("The camera is off. It only comes on if you choose to turn "
+               "it on: say turn on the camera, and I'll explain what it "
+               "does first.")
+CONTROL = {
+    "camera_on": ("turn on the camera", "enable the camera", "camera on",
+                  "turn the camera on", "switch on the camera"),
+    "camera_off": ("turn off the camera", "disable the camera", "camera off",
+                   "turn the camera off", "switch off the camera"),
+    "camera_delete": ("delete my photos", "delete the photos",
+                      "delete my pictures", "delete the pictures",
+                      "erase my photos"),
+}
+
+
+def enabled() -> bool:
+    return CFG.get("camera") is True
+
+
+def match_control(text: str):
+    """"camera_on" / "camera_off" / "camera_delete", or None."""
+    n = " ".join(text.lower().replace(",", " ").split()).strip(" .!?")
+    for verb, phrases in CONTROL.items():
+        if n in phrases:
+            return verb
+    return None
+
+
+def delete_photos() -> int:
+    """Remove every saved photo. Returns how many were deleted."""
+    n = 0
+    for f in PHOTO_DIR.glob("photo-*.jpg"):
+        try:
+            f.unlink()
+            n += 1
+        except OSError:
+            pass
+    return n
 
 # What the user says -> what the agent is asked to do with the photo.
 TASKS = {
@@ -119,6 +173,8 @@ def quality_issues(frame) -> list[str]:
 
 def capture(index: int | None = None, settle: float = 1.0) -> dict:
     """Take one photo. Returns {"ok", "path", "issues", "error"}."""
+    if not enabled():
+        return {"ok": False, "path": "", "issues": [], "error": OFF_MESSAGE}
     try:
         import cv2
     except ImportError:
@@ -151,7 +207,8 @@ def capture(index: int | None = None, settle: float = 1.0) -> dict:
     PHOTO_DIR.mkdir(parents=True, exist_ok=True)
     path = PHOTO_DIR / time.strftime("photo-%Y%m%d-%H%M%S.jpg")
     cv2.imwrite(str(path), frame, [cv2.IMWRITE_JPEG_QUALITY, 90])
-    for old in sorted(PHOTO_DIR.glob("photo-*.jpg"))[:-KEEP_PHOTOS]:
+    keep = max(1, int(CFG.get("camera_keep_photos") or 1))
+    for old in sorted(PHOTO_DIR.glob("photo-*.jpg"))[:-keep]:
         try:
             old.unlink()
         except OSError:

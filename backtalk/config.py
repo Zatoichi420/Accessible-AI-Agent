@@ -176,10 +176,15 @@ DEFAULTS = {
     # sessions should not load.
     "mcp_servers": {},
     # The camera ("what am I holding?", "read this", "describe what you
-    # see", "what color is this"). camera_index picks the camera when the
+    # see", "what color is this"). OFF BY DEFAULT ON PURPOSE: camera use is
+    # voluntary. Only the user turns it on, by saying "turn on the camera"
+    # and confirming after hearing what it does; the agent itself is
+    # blocked from changing this. camera_index picks the camera when the
     # computer has more than one (0 = the built-in or first one).
-    "camera": True,
+    # camera_keep_photos: how many recent photos stay on disk (minimum 1).
+    "camera": False,
     "camera_index": 0,
+    "camera_keep_photos": 1,
     # Tools and MCP servers the agent may NEVER use, in any permission
     # mode, e.g. a brokerage or a write-anything automation bridge. A
     # server prefix ("mcp__some_server") blocks all of its tools.
@@ -259,10 +264,11 @@ DISCIPLINE = (
     "to', 'be more descriptive', 'be brief', 'normal detail', 'stop "
     "swearing', 'no jokes', 'no more sounds', 'turn on the sounds', "
     "'I'm using NVDA' (or VoiceOver, JAWS, TalkBack), and 'what are "
-    "my settings'. Camera: 'what am I holding', 'read this', "
-    "'describe what you see', 'what color is this' take a photo and "
-    "hand it to you; in a typed session you can take one yourself by "
-    "running python -m backtalk.camera in the voice app's folder. "
+    "my settings'. Camera: OFF unless the user chose to turn it on "
+    "by saying 'turn on the camera' then 'confirm'; never turn it on "
+    "yourself and never take a photo the user didn't just ask for. When "
+    "on: 'what am I holding', 'read this', 'describe what you see', "
+    "'what color is this'; 'delete my photos', 'turn off the camera'. "
     "High-risk actions "
     "(sending email, deleting, sharing, calendar changes, pushing code, "
     "risky shell commands) need an exact phrase such as 'confirm send', "

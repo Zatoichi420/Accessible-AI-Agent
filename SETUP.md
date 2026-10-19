@@ -40,14 +40,18 @@ runs `./install.sh`, and covers Windows). Two additions:
    "Input Monitoring", Return; then VO+Right Arrow to the list, find their
    terminal app, and VO+Space to turn it on. Offer to open the pane for
    them with `open "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent"`.
-3. Camera: run `uv run python -m backtalk.camera` once yourself. On a Mac
-   this makes macOS ask for camera permission for their terminal app: tell
-   them the alert is on screen, VoiceOver should land on it, and to move to
-   "Allow" and press VO+Space; then run it again. On Windows, if it fails,
-   have them open Settings (Windows+I), search "camera privacy", and turn
-   on camera access and "Let desktop apps access your camera". A JSON line
-   with "ok": true means it works. If they have no camera, say the camera
-   features won't work and move on.
+3. Camera: it is OFF by default and stays off unless they choose it.
+   Ask: "Would you like to be able to use your computer's camera to
+   identify things you hold up, like Alexa's Show and Tell? It's
+   completely optional, and you can decide later." If no or later, skip
+   this step and tell them they can say "turn on the camera" any time.
+   If yes, tell them they will turn it on themselves after setup, by
+   saying "turn on the camera" in the assistant; it explains what it does
+   and asks them to confirm. Never set "camera": true in backtalk.json
+   yourself. Mention that the first use triggers the computer's camera
+   permission prompt (Mac: an alert for Terminal, VoiceOver lands on it,
+   move to "Allow" and press VO+Space; Windows: Settings, Privacy and
+   security, Camera, "Let desktop apps access your camera").
 
 ## Phase 2: About them
 
@@ -103,6 +107,8 @@ these rules. Skip its later phases; Phase 5 below replaces them.
    `cd <this folder> && ./run.sh`, made executable. Explain they can open it
    from the Desktop with VO+Space, or add it to Login Items to start at
    login.
-3. Finish by telling them, in three short sentences: how to talk, how to
-   hang up, and that "what are my settings" and "who can I talk to" work any
-   time.
+3. Finish by telling them, in a few short sentences: how to talk, how to
+   hang up, that "what are my settings" and "who can I talk to" work any
+   time, and that everything stays on their computer under their own
+   accounts: the person who made the assistant has no access to their
+   camera, recordings or data (details in PRIVACY.md).

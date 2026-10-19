@@ -875,6 +875,37 @@ async def amain():
             mouth.say("Auto-approve means I act without asking "
                       "permission, and it becomes your saved default. "
                       "Say confirm to switch.")
+        elif verb == "camera_on":
+            resp = ""
+            if camera.enabled():
+                mouth.say("The camera is already on. Say turn off the "
+                          "camera to switch it off.")
+            else:
+                _CONFIRM["verb"] = "camera_on"
+                _CONFIRM["at"] = time.monotonic()
+                mouth.say(camera.DISCLAIMER)
+        elif verb == "camera_on:confirmed":
+            resp = ""
+            saved = _write_config_key("camera", True)
+            log("[camera] turned on by the user"
+                + ("" if saved else " (session only)"))
+            mouth.say("Camera on" + ("" if saved else ", for this session")
+                      + ". Hold something up and say what am I holding. "
+                      "Say turn off the camera any time.")
+        elif verb == "camera_off":
+            resp = ""
+            _write_config_key("camera", False)
+            n = camera.delete_photos()
+            log(f"[camera] turned off by the user, {n} photo(s) deleted")
+            mouth.say("Camera off" + (f", and {n} saved photo"
+                                      f"{'s' if n != 1 else ''} deleted."
+                                      if n else "."))
+        elif verb == "camera_delete":
+            resp = ""
+            n = camera.delete_photos()
+            log(f"[camera] {n} photo(s) deleted on request")
+            mouth.say(f"Deleted {n} photo{'s' if n != 1 else ''}." if n
+                      else "There are no saved photos.")
         elif verb == "noask:confirmed":
             resp = ""
             saved = _write_config_key("permission_mode",
@@ -1056,7 +1087,7 @@ async def amain():
             except Exception:
                 pass
             speak_task = None
-        verb = verb or console_match(text)
+        verb = verb or console_match(text) or camera.match_control(text)
         if not verb and personas.ENABLED:
             pid = personas.match_switch(text)
             setting = None if pid else personas.match_setting(text)
@@ -1069,7 +1100,10 @@ async def amain():
         if verb:
             await run_console(verb)
             return True
-        task = camera.match(text) if CFG.get("camera", True) else None
+        task = camera.match(text)
+        if task and not camera.enabled():
+            mouth.say(camera.OFF_MESSAGE)
+            return True
         if task:
             _deny_pending()
             await brain.reset_turn()
