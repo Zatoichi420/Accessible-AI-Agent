@@ -1,0 +1,16 @@
+{
+  "_about": "Copy the profile block into backtalk.json, or just change settings by voice. Leave a key out to use the character's own default.",
+  "profile": {
+    "character": "data",
+    "screen_reader": "voiceover",
+    "detail_level": "descriptive",
+    "narrate_actions": true,
+    "read_errors_exactly": true,
+    "image_description": "full",
+    "earcons": true,
+    "swearing": "off",
+    "humor": 1,
+    "encouragement": "normal",
+    "call_me": "Captain"
+  }
+}
